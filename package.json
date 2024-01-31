@@ -1,0 +1,14 @@
+{
+  "scripts": {
+    "start": "node server.js",
+    "build": "prisma generate"
+  },
+  "devDependencies": {
+    "@flydotio/node-demo": "^0.2.1"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.9.0",
+    "prisma": "^5.9.0",
+    "sqlite3": "^5.1.7"
+  }
+}

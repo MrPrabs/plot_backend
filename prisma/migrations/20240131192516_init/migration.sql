@@ -1,0 +1,5 @@
+-- CreateTable
+CREATE TABLE "Welcome" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "count" INTEGER NOT NULL
+);
