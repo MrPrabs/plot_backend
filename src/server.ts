@@ -1,6 +1,8 @@
 import express, { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
+import userRouter from './routes/user.router';
+
 // Create an instance of PrismaClient
 const prisma = new PrismaClient();
 
@@ -11,17 +13,8 @@ const PORT: number = parseInt(process.env.PORT || '3000');
 // Middleware to parse JSON request bodies
 app.use(express.json());
 
-// Define route for fetching database schema
-app.get('/schema', async (req: Request, res: Response) => {
-  try {
-    // Fetch the database schema
-    const schema = await prisma.$queryRaw`SELECT * FROM User`;
-    res.json({ schema });
-  } catch (error) {
-    console.error('Error fetching schema:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+// Mount the userRouter at the /users path
+app.use('/users', userRouter);
 
 
 // Start the server
