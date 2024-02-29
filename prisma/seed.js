@@ -5,8 +5,8 @@ async function main() {
     // User
     const user = await prisma.user.create({
         data: {
-            username: "john_doe",
-            email: "john@example.com",
+            username: "john_doe2",
+            email: "johndoe1@example.com",
             password_hash: "hashedpassword",
             profile_picture: "https://example.com/profile.jpg",
             user_type: "leaser", // Assume 'leaser', 'subleaser', 'administrator'
@@ -39,6 +39,16 @@ async function main() {
         },
     });
 
+    // Spot Availability
+    const spotAvailability = await prisma.spotAvailability.create({
+        data: {
+            spot_id: parkingSpot.spot_id,
+            start_time: new Date("2023-01-01T09:00:00Z"),
+            end_time: new Date("2023-01-01T17:00:00Z"),
+            status: "available",
+        },
+    });
+
     // Reservation
     const reservation = await prisma.reservation.create({
         data: {
@@ -47,6 +57,8 @@ async function main() {
             start_time: new Date("2023-01-01T09:00:00Z"),
             end_time: new Date("2023-01-01T17:00:00Z"),
             status: "confirmed",
+            // Linking the reservation to the availability
+            availability_id: spotAvailability.availability_id,
         },
     });
 
@@ -83,7 +95,7 @@ async function main() {
         },
     });
 
-    console.log({ user, parkingLot, parkingSpot, reservation, review, message, subleaseAgreement });
+    console.log({ user, parkingLot, parkingSpot, spotAvailability, reservation, review, message, subleaseAgreement });
 }
 
 main()

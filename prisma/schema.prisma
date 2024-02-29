@@ -7,29 +7,28 @@ datasource db {
   url      = "postgresql://postgres:TWq3a9gcaHyqLCX@localhost:5433"
 }
 
-// Enum for user types
 enum UserType {
   leaser
   subleaser
   administrator
 }
 
-// Enum for reservation status
 enum ReservationStatus {
   pending
   confirmed
   canceled
 }
 
-// Enum for sublease agreement status
 enum AgreementStatus {
   pending
   active
   terminated
 }
 
-// Users model
-// Enum definitions and datasource configurations remain unchanged.
+enum AvailabilityStatus {
+  available
+  booked
+}
 
 model User {
   user_id          Int                 @id @default(autoincrement())
@@ -39,17 +38,14 @@ model User {
   profile_picture  String?
   user_type        UserType
   ownedLots        ParkingLot[]        @relation("lotOwner")
-  reservedSpots    ParkingSpot[]       @relation("spotReserver")
   reservations     Reservation[]
   sentMessages     Message[]           @relation("messageSender")
   receivedMessages Message[]           @relation("messageReceiver")
   originalLeases   SubleaseAgreement[] @relation("originalLeaser")
   subLeases        SubleaseAgreement[] @relation("subLeaser")
   reviews          Review[]
-  // Additional fields and relations as previously defined...
 }
 
-// ParkingLots model
 model ParkingLot {
   lot_id         Int           @id @default(autoincrement())
   name           String
@@ -71,29 +67,39 @@ model ParkingSpot {
   spot_number        Int?
   reservable         Boolean
   description        String?
-  is_reserved        Boolean?
-  reserved_by        Int? // This field links to a User who reserved the spot
-  reserver           User?               @relation("spotReserver", fields: [reserved_by], references: [user_id])
   price              Float
   lot                ParkingLot          @relation(fields: [lot_id], references: [lot_id])
   reservations       Reservation[]
+  is_reserved    Boolean                 @default(false)
   subleaseAgreements SubleaseAgreement[]
-  // Ensure the rest of the model is correctly defined...
+  availabilities     SpotAvailability[]
 }
 
-// Reservations model
 model Reservation {
-  reservation_id Int               @id @default(autoincrement())
-  spot_id        Int
-  user_id        Int
-  start_time     DateTime
-  end_time       DateTime
-  status         ReservationStatus
-  parkingSpot    ParkingSpot       @relation(fields: [spot_id], references: [spot_id])
-  user           User              @relation(fields: [user_id], references: [user_id])
+  reservation_id   Int               @id @default(autoincrement())
+  spot_id          Int
+  user_id          Int
+  start_time       DateTime
+  end_time         DateTime
+  status           ReservationStatus
+  parkingSpot      ParkingSpot       @relation(fields: [spot_id], references: [spot_id])
+  user             User              @relation(fields: [user_id], references: [user_id])
+  availability_id  Int?
+  spotAvailability SpotAvailability? @relation(fields: [availability_id], references: [availability_id])
 }
 
-// Reviews model
+model SpotAvailability {
+  availability_id Int                @id @default(autoincrement())
+  spot_id         Int
+  start_time      DateTime
+  end_time        DateTime
+  status          AvailabilityStatus
+  parkingSpot     ParkingSpot        @relation(fields: [spot_id], references: [spot_id])
+  reservations    Reservation[]
+
+  @@unique([spot_id, start_time, end_time], name: "unique_spot_availability")
+}
+
 model Review {
   review_id  Int        @id @default(autoincrement())
   lot_id     Int
@@ -105,7 +111,6 @@ model Review {
   user       User       @relation(fields: [user_id], references: [user_id])
 }
 
-// Messages model
 model Message {
   message_id   Int      @id @default(autoincrement())
   sender_id    Int
@@ -116,7 +121,6 @@ model Message {
   receiver     User     @relation("messageReceiver", fields: [receiver_id], references: [user_id])
 }
 
-// SubleaseAgreements model
 model SubleaseAgreement {
   agreement_id       Int             @id @default(autoincrement())
   original_leaser_id Int
