@@ -20,7 +20,7 @@ export const getUserById = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
     const user = await prisma.user.findUnique({
-      where: { id: parseInt(id) },
+      where: { user_id: parseInt(id) },
     });
     res.status(200).json({ user });
   } catch (error) {
@@ -29,28 +29,6 @@ export const getUserById = async (req: Request, res: Response) => {
   }
 };
 
-// create a new user 
-export const createNewUser = async (req: Request, res: Response) => {
-  try {
-    const { username, email } = req.body;
-    // Create the user in the database using Prisma
-    const newUser = await prisma.user.create({
-      data: {
-        username: username,
-        email: email,
-      },
-    });
-    // Send a success response back to the client
-    res.status(201).json({ user: newUser });
-  } catch (error) {
-    // Handle any errors that occur during user creation
-    console.error('Error creating user:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
 
 
-
-
-
-export default { getUsers, getUserById, createNewUser};
+export default { getUsers, getUserById};

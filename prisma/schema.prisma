@@ -7,9 +7,125 @@ datasource db {
   url      = "postgresql://postgres:TWq3a9gcaHyqLCX@localhost:5433"
 }
 
-model User {
-  id      Int      @id @default(autoincrement())
-  username    String @unique
-  email   String   @unique
-} 
+// Enum for user types
+enum UserType {
+  leaser
+  subleaser
+  administrator
+}
 
+// Enum for reservation status
+enum ReservationStatus {
+  pending
+  confirmed
+  canceled
+}
+
+// Enum for sublease agreement status
+enum AgreementStatus {
+  pending
+  active
+  terminated
+}
+
+// Users model
+// Enum definitions and datasource configurations remain unchanged.
+
+model User {
+  user_id          Int                 @id @default(autoincrement())
+  username         String              @unique
+  email            String              @unique
+  password_hash    String
+  profile_picture  String?
+  user_type        UserType
+  ownedLots        ParkingLot[]        @relation("lotOwner")
+  reservedSpots    ParkingSpot[]       @relation("spotReserver")
+  reservations     Reservation[]
+  sentMessages     Message[]           @relation("messageSender")
+  receivedMessages Message[]           @relation("messageReceiver")
+  originalLeases   SubleaseAgreement[] @relation("originalLeaser")
+  subLeases        SubleaseAgreement[] @relation("subLeaser")
+  reviews          Review[]
+  // Additional fields and relations as previously defined...
+}
+
+// ParkingLots model
+model ParkingLot {
+  lot_id         Int           @id @default(autoincrement())
+  name           String
+  address        String
+  description    String?
+  latitude       Float
+  longitude      Float
+  total_spots    Int
+  spot_numbering Boolean
+  owner_id       Int
+  owner          User          @relation("lotOwner", fields: [owner_id], references: [user_id])
+  parkingSpots   ParkingSpot[]
+  reviews        Review[]
+}
+
+model ParkingSpot {
+  spot_id            Int                 @id @default(autoincrement())
+  lot_id             Int
+  spot_number        Int?
+  reservable         Boolean
+  description        String?
+  is_reserved        Boolean?
+  reserved_by        Int? // This field links to a User who reserved the spot
+  reserver           User?               @relation("spotReserver", fields: [reserved_by], references: [user_id])
+  price              Float
+  lot                ParkingLot          @relation(fields: [lot_id], references: [lot_id])
+  reservations       Reservation[]
+  subleaseAgreements SubleaseAgreement[]
+  // Ensure the rest of the model is correctly defined...
+}
+
+// Reservations model
+model Reservation {
+  reservation_id Int               @id @default(autoincrement())
+  spot_id        Int
+  user_id        Int
+  start_time     DateTime
+  end_time       DateTime
+  status         ReservationStatus
+  parkingSpot    ParkingSpot       @relation(fields: [spot_id], references: [spot_id])
+  user           User              @relation(fields: [user_id], references: [user_id])
+}
+
+// Reviews model
+model Review {
+  review_id  Int        @id @default(autoincrement())
+  lot_id     Int
+  user_id    Int
+  rating     Int
+  comment    String?
+  created_at DateTime   @default(now())
+  parkingLot ParkingLot @relation(fields: [lot_id], references: [lot_id])
+  user       User       @relation(fields: [user_id], references: [user_id])
+}
+
+// Messages model
+model Message {
+  message_id   Int      @id @default(autoincrement())
+  sender_id    Int
+  receiver_id  Int
+  message_text String
+  created_at   DateTime @default(now())
+  sender       User     @relation("messageSender", fields: [sender_id], references: [user_id])
+  receiver     User     @relation("messageReceiver", fields: [receiver_id], references: [user_id])
+}
+
+// SubleaseAgreements model
+model SubleaseAgreement {
+  agreement_id       Int             @id @default(autoincrement())
+  original_leaser_id Int
+  subleaser_id       Int
+  spot_id            Int
+  start_date         DateTime
+  end_date           DateTime
+  status             AgreementStatus
+  originalLeaser     User            @relation("originalLeaser", fields: [original_leaser_id], references: [user_id])
+  subLeaser          User            @relation("subLeaser", fields: [subleaser_id], references: [user_id])
+  parkingSpot        ParkingSpot     @relation(fields: [spot_id], references: [spot_id])
+}

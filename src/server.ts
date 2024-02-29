@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
 import userRouter from './routes/user.router';
+import parkingSpotRouter from './routes/parkingSpot.router';
 
 // Create an instance of PrismaClient
 const prisma = new PrismaClient();
@@ -15,6 +16,7 @@ app.use(express.json());
 
 // Mount the userRouter at the /users path
 app.use('/users', userRouter);
+app.use('/parkingSpots', parkingSpotRouter);
 
 
 // Start the server
