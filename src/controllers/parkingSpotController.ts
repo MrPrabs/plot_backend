@@ -15,7 +15,21 @@ export const getParkingSpots = async (req: Request, res: Response) => {
     }
 }
 
-export default { getParkingSpots };
+// // Fetch a single parking spot by ID
+export const getParkingSpotById = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+        const parkingSpot = await prisma.parkingSpot.findUnique({
+            where: { spot_id: parseInt(id) },
+        });
+        res.status(200).json({ parkingSpot });
+    } catch (error) {
+        console.error('Error handling request:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+export default { getParkingSpots, getParkingSpotById };
 
 
     
