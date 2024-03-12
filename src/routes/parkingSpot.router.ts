@@ -11,6 +11,6 @@ parkingSpotRouter.get('/', parkingSpotController.getParkingSpots);
 parkingSpotRouter.get('/:id', parkingSpotController.getParkingSpotById);
 
 // Route for creating a new parking spot
-// parkingSpotRouter.post('/', parkingSpotController.createParkingSpot);
+parkingSpotRouter.post('/', parkingSpotController.createParkingSpot);
 
 export default parkingSpotRouter;

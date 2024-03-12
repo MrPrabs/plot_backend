@@ -1,4 +1,4 @@
-// parkingLot.controller.ts
+// parkingLots.controller.ts
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
@@ -29,4 +29,42 @@ export const getParkingLotById = async (req: Request, res: Response) => {
     }
 }
 
-export default { getParkingLots, getParkingLotById };
+// create a new parking lot 
+// model ParkingLot {
+//     lot_id         Int           @id @default(autoincrement())
+//     name           String
+//     address        String
+//     description    String?
+//     latitude       Float
+//     longitude      Float
+//     total_spots    Int
+//     spot_numbering Boolean
+//     owner_id       Int
+//     owner          User          @relation("lotOwner", fields: [owner_id], references: [user_id])
+//     parkingSpots   ParkingSpot[]
+//     reviews        Review[]
+//   }
+// Create a new parking lot
+export const createParkingLot = async (req: Request, res: Response) => {
+    const { name, address, description, latitude, longitude, total_spots, spot_numbering, owner_id } = req.body;
+    try {
+        const newParkingLot = await prisma.parkingLot.create({
+            data: {
+                name,
+                address,
+                description: description || undefined,
+                latitude: parseFloat(latitude),
+                longitude: parseFloat(longitude),
+                total_spots: parseInt(total_spots),
+                spot_numbering: spot_numbering === 'true',
+                owner_id: parseInt(owner_id),
+            },
+        });
+        res.status(201).json({ message: 'Parking lot created successfully', parkingLot: newParkingLot });
+    } catch (error) {
+        console.error('Error handling request:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+export default { getParkingLots, getParkingLotById, createParkingLot};
