@@ -1,6 +1,8 @@
 // geocodingService.ts
 
 import axios from 'axios';
+import { env } from 'process';
+
 
 interface GeocodingResponse {
   results: {
@@ -18,7 +20,7 @@ export async function convertAddressToCoordinates(address: string): Promise<{ la
     const response = await axios.get<GeocodingResponse>('https://maps.googleapis.com/maps/api/geocode/json', {
       params: {
         address,
-        key: 'AIzaSyCHUdphdZ9ojeoDJiorIr3enjJnuRPvZK8', // Replace with your actual Google Maps API key
+        key: process.env.GOOGLE_KEY, // Replace with your actual Google Maps API key
       },
     });
 
