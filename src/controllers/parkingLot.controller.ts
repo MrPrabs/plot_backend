@@ -25,6 +25,9 @@ export const getParkingLotById = async (req: Request, res: Response) => {
     try {
         const parkingLot = await prisma.parkingLot.findUnique({
             where: { lot_id: parseInt(id) },
+            include: {
+                parkingSpots: true // Include associated parking spots
+            }
         });
         res.status(200).json({ parkingLot });
     } catch (error) {
